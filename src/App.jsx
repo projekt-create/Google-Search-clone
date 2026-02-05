@@ -1,35 +1,23 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 
+const API_URL = "https://serpapi-backend-hst6.onrender.com/search";
+
 function App() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const API_URL = "https://serpapi-backend-hst6.onrender.com/search";
+  const fetchResults = async (q) => {
+    if (!q) return;
 
-  
-  useEffect(() => {
-    if (!query) {
-      setResults([]);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      fetchResults();
-    }, 500); 
-
-    return () => clearTimeout(timer);
-  }, [query]);
-
-  const fetchResults = async () => {
     setLoading(true);
     setError("");
     setResults([]);
 
     try {
-      const res = await fetch(`${API_URL}?q=${query}`);
+      const res = await fetch(`${API_URL}?q=${q}`);
       const data = await res.json();
 
       if (data.organic_results) {
@@ -44,6 +32,14 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchResults(query);
+    }, 500); 
+
+    return () => clearTimeout(timer);
+  }, [query]); 
+
   return (
     <div className="app">
       <h1 className="title">🔍 Google Search Clone</h1>
@@ -55,7 +51,7 @@ function App() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <button onClick={fetchResults}>Search</button>
+        <button onClick={() => fetchResults(query)}>Search</button>
       </div>
 
       {loading && <p className="info">Loading...</p>}
